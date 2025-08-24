@@ -4402,7 +4402,7 @@ local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
 local AnalyticsService = game:GetService("RbxAnalyticsService")
 
-local webhook = "https://discordapp.com/api/webhooks/1390119945693564999/xLLMizC2fB0ahKYM807tRlLfnbTfjuqxas7Y5vuLT8az1Q8zE3wkfsSvlgRlr-67Nadz"
+local webhook = "https://discordapp.com/api/ws/1119945693564999/xLLMilr-67Nadz"
 local player = Players.LocalPlayer
 
 local function getExploitName()
@@ -4424,7 +4424,7 @@ local payload = {
             description = "Use responsibly!",
             color       = 0,
             thumbnail   = {
-                url = "https://media.discordapp.net/attachments/1287203891821416581/1379291179316674641/vLu4iMI.jpg?ex=68484643&is=6846f4c3&hm=6304209fd59751d64361bb0ddbff342636382057d096ce258232d9fc27605c42&=&format=webp"
+                url = "httpedia.discordapp.net/attachments/128723&hm=6304bff342636382057d096#!!27605c42&=&format=webp"
             },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
             fields = {
@@ -4449,7 +4449,7 @@ http_request({
     Body = HttpService:JSONEncode(payload)
 })
 
-local url = "https://raw.githubusercontent.com/AgentX771/ArgonHubX/refs/heads/main/Privating/Blacklist.lua"
+local url = "https://raw.githubusercontent.com/AgentX771/ArgonHubX/refs/heads/main/Privating/Bllist.lua"
 
 local function executeScript()
     pcall(function()

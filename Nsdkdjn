@@ -1,5 +1,5 @@
 -- Game ID Check
-if game.PlaceId ~= 5253186791 then
+if game.PlaceId ~= 1962086868 then
     game.Players.LocalPlayer:Kick("Not supported game")
     return
 end

@@ -4402,7 +4402,7 @@ local Players = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
 local AnalyticsService = game:GetService("RbxAnalyticsService")
 
-local webhook = "https://discordapp.com/api/ws/1119945693564999/xLLMilr-67Nadz"
+local webhook = "https://dis945693564999/Akashiadz"
 local player = Players.LocalPlayer
 
 local function getExploitName()

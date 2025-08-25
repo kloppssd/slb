@@ -1,0 +1,428 @@
+-- ULTRA PROFESYONEİL PEA GİRİŞ ANIMASYONU SCRİPTİ
+-- Apple iOS Tarzı Premium Animasyon - Sadece Harfler
+-- Tüm cihazlarda (PC, Tablet, iPhone, iPad) mükemmel çalışır
+-- HATASIZ VERSİYON - UIGradient Transparency Hatası Çözüldü
+-- Siyah ekranın da kaybolması için geliştirilmiş kapanış animasyonu - TAMAMEN HATASIZ
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Ultra premium ayarlar
+local ANIMATION_DURATION = {
+    BACKGROUND_APPEAR = 2.0, -- Venom tarzı yayılma süresi
+    LETTER_APPEAR = 1.2,
+    LETTER_DELAY = 0.6,
+    GLOW_EFFECT = 0.7,
+    FINAL_HOLD = 6.0, -- Harfler geldikten sonra 6 saniye bekleme
+    COMBINED_EXIT = 1.5 -- Tüm GUI'nin birlikte çıkışı
+}
+
+local COLORS = {
+    BACKGROUND = Color3.fromRGB(0, 0, 0),
+    TEXT_PRIMARY = Color3.fromRGB(255, 255, 255),
+    TEXT_GLOW = Color3.fromRGB(64, 156, 255),
+    GRADIENT_1 = Color3.fromRGB(8, 8, 20),
+    GRADIENT_2 = Color3.fromRGB(0, 0, 0),
+    GRADIENT_3 = Color3.fromRGB(12, 12, 28)
+}
+
+-- Ana ekran GUI oluşturma (Ultra premium)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PEAUltraPremiumIntro"
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999999
+screenGui.Parent = playerGui
+
+-- VENOM TARZI YUVARLAK KENARLI SİYAH ARKA PLAN (ORTADAN BAŞLAYARAK)
+local backgroundFrame = Instance.new("Frame")
+backgroundFrame.Name = "UltraBackgroundFrame"
+backgroundFrame.Size = UDim2.new(0, 50, 0, 50) -- Küçük daire olarak başla
+backgroundFrame.Position = UDim2.new(0.5, -25, 0.5, -25) -- Ekranın tam ortasında
+backgroundFrame.BackgroundColor3 = COLORS.BACKGROUND
+backgroundFrame.BorderSizePixel = 0
+backgroundFrame.ZIndex = 100
+backgroundFrame.BackgroundTransparency = 0
+backgroundFrame.Parent = screenGui
+
+-- Yuvarlak kenarlar için UICorner (BAŞLANGIÇTA ÇOK YUVARLAK)
+local backgroundCorner = Instance.new("UICorner")
+backgroundCorner.CornerRadius = UDim.new(1, 0) -- Tam daire
+backgroundCorner.Parent = backgroundFrame
+
+-- Premium gradient efekti (HATASIZ VERSİYON)
+local backgroundGradient = Instance.new("UIGradient")
+backgroundGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, COLORS.GRADIENT_1),
+    ColorSequenceKeypoint.new(0.25, COLORS.GRADIENT_2),
+    ColorSequenceKeypoint.new(0.5, COLORS.BACKGROUND),
+    ColorSequenceKeypoint.new(0.75, COLORS.GRADIENT_2),
+    ColorSequenceKeypoint.new(1, COLORS.GRADIENT_3)
+}
+backgroundGradient.Rotation = 45
+backgroundGradient.Parent = backgroundFrame
+
+-- Ekstra glow efekti için ikinci frame
+local glowFrame = Instance.new("Frame")
+glowFrame.Name = "GlowFrame"
+glowFrame.Size = UDim2.new(0, 60, 0, 60)
+glowFrame.Position = UDim2.new(0.5, -30, 0.5, -30)
+glowFrame.BackgroundColor3 = COLORS.TEXT_GLOW
+glowFrame.BackgroundTransparency = 0.9
+glowFrame.BorderSizePixel = 0
+glowFrame.ZIndex = 99
+glowFrame.Parent = screenGui
+
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(1, 0)
+glowCorner.Parent = glowFrame
+
+-- PEA Harfleri İçin Container (TAM ORTADA)
+local lettersFrame = Instance.new("Frame")
+lettersFrame.Name = "UltraPremiumLettersFrame"
+lettersFrame.Size = UDim2.new(0.6, 0, 0.2, 0)
+lettersFrame.Position = UDim2.new(0.2, 0, 0.4, 0)
+lettersFrame.BackgroundTransparency = 1
+lettersFrame.ZIndex = 101
+lettersFrame.Parent = backgroundFrame
+
+-- Ultra premium harf yaratma fonksiyonu
+local function createPremiumLetter(text, xPos)
+    local letterFrame = Instance.new("Frame")
+    letterFrame.Name = "Letter" .. text .. "Frame"
+    letterFrame.Size = UDim2.new(0.25, 0, 1, 0)
+    letterFrame.Position = UDim2.new(xPos, 0, 0, 0)
+    letterFrame.BackgroundTransparency = 1
+    letterFrame.ZIndex = 102
+    letterFrame.Parent = lettersFrame
+    
+    -- Ana harf
+    local letter = Instance.new("TextLabel")
+    letter.Name = "Letter" .. text
+    letter.Size = UDim2.new(1, 0, 1, 0)
+    letter.Position = UDim2.new(0, 0, 0, 0)
+    letter.BackgroundTransparency = 1
+    letter.Text = text
+    letter.TextColor3 = COLORS.TEXT_PRIMARY
+    letter.TextScaled = true
+    letter.Font = Enum.Font.GothamBold
+    letter.ZIndex = 104
+    letter.TextTransparency = 1
+    letter.Parent = letterFrame
+    
+    -- Glow efekti için shadow
+    local letterShadow = Instance.new("TextLabel")
+    letterShadow.Name = "Shadow" .. text
+    letterShadow.Size = UDim2.new(1, 4, 1, 4)
+    letterShadow.Position = UDim2.new(0, 2, 0, 2)
+    letterShadow.BackgroundTransparency = 1
+    letterShadow.Text = text
+    letterShadow.TextColor3 = COLORS.TEXT_GLOW
+    letterShadow.TextScaled = true
+    letterShadow.Font = Enum.Font.GothamBold
+    letterShadow.ZIndex = 103
+    letterShadow.TextTransparency = 1
+    letterShadow.Parent = letterFrame
+    
+    return letterFrame, letter, letterShadow
+end
+
+-- Harfleri oluştur
+local letterP_Frame, letterP, letterP_Shadow = createPremiumLetter("P", 0.125)
+local letterE_Frame, letterE, letterE_Shadow = createPremiumLetter("E", 0.375)
+local letterA_Frame, letterA, letterA_Shadow = createPremiumLetter("A", 0.625)
+
+-- Ultra Professional Tween Settings
+local letterTweenInfo = TweenInfo.new(
+    ANIMATION_DURATION.LETTER_APPEAR,
+    Enum.EasingStyle.Back,
+    Enum.EasingDirection.Out,
+    0,
+    false,
+    0
+)
+
+local glowTweenInfo = TweenInfo.new(
+    ANIMATION_DURATION.GLOW_EFFECT,
+    Enum.EasingStyle.Sine,
+    Enum.EasingDirection.InOut,
+    0,
+    false,
+    0
+)
+
+-- VENOM TARZI MÜKEMMEL YUVARLAK ARKA PLAN YAYILMA ANİMASYONU
+local function startVenomStyleBackground()
+    local camera = workspace.CurrentCamera
+    local screenSize = camera.ViewportSize
+    local maxDimension = math.max(screenSize.X, screenSize.Y)
+    local finalSize = maxDimension * 1.4 -- Kesinlikle tüm ekranı kapsayacak boyut
+    
+    -- 1. Glow frame'in yayılması
+    local glowExpand = TweenService:Create(glowFrame, 
+        TweenInfo.new(ANIMATION_DURATION.BACKGROUND_APPEAR * 0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {
+            Size = UDim2.new(0, finalSize * 0.15, 0, finalSize * 0.15),
+            Position = UDim2.new(0.5, -finalSize * 0.075, 0.5, -finalSize * 0.075),
+            BackgroundTransparency = 0.98
+        }
+    )
+    
+    -- 2. Ana background'un smooth yayılması
+    local backgroundExpand = TweenService:Create(backgroundFrame, 
+        TweenInfo.new(ANIMATION_DURATION.BACKGROUND_APPEAR, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {
+            Size = UDim2.new(0, finalSize, 0, finalSize),
+            Position = UDim2.new(0.5, -finalSize/2, 0.5, -finalSize/2)
+        }
+    )
+    
+    -- 3. Corner radius'un yavaşça düzleşmesi (daire → kare)
+    local cornerSmooth = TweenService:Create(backgroundCorner,
+        TweenInfo.new(ANIMATION_DURATION.BACKGROUND_APPEAR * 1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        {
+            CornerRadius = UDim.new(0, 15) -- Hafif yuvarlak kenarlar
+        }
+    )
+    
+    -- 4. Gradient rotasyonu
+    local gradientRotate = TweenService:Create(backgroundGradient,
+        TweenInfo.new(ANIMATION_DURATION.BACKGROUND_APPEAR * 1.5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
+        {
+            Rotation = 135
+        }
+    )
+    
+    -- Animasyonları sırayla başlat
+    glowExpand:Play()
+    backgroundExpand:Play()
+    cornerSmooth:Play()
+    gradientRotate:Play()
+    
+    -- Glow'u sonradan kaybet
+    spawn(function()
+        wait(ANIMATION_DURATION.BACKGROUND_APPEAR * 0.7)
+        local glowFadeOut = TweenService:Create(glowFrame,
+            TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            {
+                BackgroundTransparency = 1
+            }
+        )
+        glowFadeOut:Play()
+    end)
+    
+    return backgroundExpand
+end
+
+-- Harf animasyonu fonksiyonu
+local function animateUltraPremiumLetter(letterFrame, letter, shadow, delay)
+    letterFrame.Position = letterFrame.Position + UDim2.new(0, 0, -1.2, 0)
+    letterFrame.Size = UDim2.new(0.12, 0, 0.5, 0)
+    letter.TextTransparency = 1
+    shadow.TextTransparency = 1
+    
+    spawn(function()
+        wait(delay)
+        
+        local targetPos = letterFrame.Position - UDim2.new(0, 0, -1.2, 0)
+        local targetSize = UDim2.new(0.25, 0, 1, 0)
+        
+        local slideIn = TweenService:Create(letterFrame, letterTweenInfo, {
+            Position = targetPos
+        })
+        
+        local scaleUp = TweenService:Create(letterFrame, letterTweenInfo, {
+            Size = targetSize
+        })
+        
+        local fadeInMain = TweenService:Create(letter, letterTweenInfo, {
+            TextTransparency = 0
+        })
+        
+        local fadeInShadow = TweenService:Create(shadow, letterTweenInfo, {
+            TextTransparency = 0.6
+        })
+        
+        slideIn:Play()
+        scaleUp:Play()
+        fadeInMain:Play()
+        fadeInShadow:Play()
+        
+        wait(ANIMATION_DURATION.LETTER_APPEAR * 0.4)
+        
+        -- Glow efekti
+        local glowEffect = TweenService:Create(letter, glowTweenInfo, {
+            TextColor3 = COLORS.TEXT_GLOW
+        })
+        
+        local shadowGlow = TweenService:Create(shadow, glowTweenInfo, {
+            TextTransparency = 0.3,
+            TextColor3 = Color3.fromRGB(80, 180, 255)
+        })
+        
+        glowEffect:Play()
+        shadowGlow:Play()
+        
+        wait(ANIMATION_DURATION.GLOW_EFFECT)
+        
+        -- Normal'e dönüş
+        local returnNormal = TweenService:Create(letter, glowTweenInfo, {
+            TextColor3 = COLORS.TEXT_PRIMARY
+        })
+        
+        local shadowReturn = TweenService:Create(shadow, glowTweenInfo, {
+            TextTransparency = 0.7,
+            TextColor3 = COLORS.TEXT_GLOW
+        })
+        
+        returnNormal:Play()
+        shadowReturn:Play()
+    end)
+end
+
+-- Responsive Design
+local function setupResponsiveDesign()
+    local camera = workspace.CurrentCamera
+    local screenSize = camera.ViewportSize
+    local aspectRatio = screenSize.X / screenSize.Y
+    
+    if aspectRatio < 1.8 then
+        lettersFrame.Size = UDim2.new(0.75, 0, 0.18, 0)
+        lettersFrame.Position = UDim2.new(0.125, 0, 0.41, 0)
+    elseif aspectRatio > 2.2 then
+        lettersFrame.Size = UDim2.new(0.5, 0, 0.25, 0)
+        lettersFrame.Position = UDim2.new(0.25, 0, 0.375, 0)
+    end
+end
+
+-- ULTRA PREMIUM Ana Animasyon Sırası
+local function startUltraPremiumIntroAnimation()
+    -- 1. Venom tarzı arka plan yayılması
+    local backgroundAnim = startVenomStyleBackground()
+    
+    -- Arka plan animasyonu bitince harfleri başlat
+    backgroundAnim.Completed:Connect(function()
+        wait(0.3)
+        
+        -- Harfleri sırayla animate et
+        spawn(function()
+            animateUltraPremiumLetter(letterP_Frame, letterP, letterP_Shadow, 0.1)
+        end)
+        
+        spawn(function()
+            animateUltraPremiumLetter(letterE_Frame, letterE, letterE_Shadow, 0.1 + ANIMATION_DURATION.LETTER_DELAY)
+        end)
+        
+        spawn(function()
+            animateUltraPremiumLetter(letterA_Frame, letterA, letterA_Shadow, 0.1 + (ANIMATION_DURATION.LETTER_DELAY * 2))
+        end)
+        
+        -- Tüm harfler geldikten sonra 6 saniye bekleme ve sonra hep birlikte çıkış
+        local totalLetterTime = 0.1 + (ANIMATION_DURATION.LETTER_DELAY * 2) + ANIMATION_DURATION.LETTER_APPEAR + ANIMATION_DURATION.GLOW_EFFECT
+        
+        -- TAMAMEN HATASIZ Kapanış Animasyonu (UIGradient Transparency hatası çözüldü)
+        local function animateExitSequence()
+            local combinedExitTweenInfo = TweenInfo.new(
+                ANIMATION_DURATION.COMBINED_EXIT, 
+                Enum.EasingStyle.Cubic, 
+                Enum.EasingDirection.InOut
+            )
+
+            -- 1. Harflerin sırayla kaybolması (vortex tarzı efekt)
+            local function animateLetterExit(letterFrame, letter, shadow, delay)
+                spawn(function()
+                    wait(delay)
+                    local letterExit = TweenService:Create(letterFrame, combinedExitTweenInfo, {
+                        Size = UDim2.new(0, 0, 0, 0),
+                        Position = UDim2.new(0.5, 0, 0.5, 0)
+                    })
+                    
+                    local letterTextExit = TweenService:Create(letter, combinedExitTweenInfo, {
+                        TextTransparency = 1,
+                        TextColor3 = COLORS.TEXT_GLOW
+                    })
+                    
+                    local shadowTextExit = TweenService:Create(shadow, combinedExitTweenInfo, {
+                        TextTransparency = 1
+                    })
+                    
+                    letterExit:Play()
+                    letterTextExit:Play()
+                    shadowTextExit:Play()
+                end)
+            end
+
+            -- Harfleri sırayla kaybolmaya başlat
+            animateLetterExit(letterP_Frame, letterP, letterP_Shadow, 0)
+            animateLetterExit(letterE_Frame, letterE, letterE_Shadow, 0.15)
+            animateLetterExit(letterA_Frame, letterA, letterA_Shadow, 0.3)
+
+            -- 2. Arka planın vortex tarzı kapanışı - HATASIZ VERSİYON
+            local camera = workspace.CurrentCamera
+            local screenSize = camera.ViewportSize
+            local finalSize = math.max(screenSize.X, screenSize.Y) * 0.05
+
+            -- GRADİENTİ MANuel OLARAK SİL (Tween hatası olmamasi için)
+            spawn(function()
+                wait(0.2)
+                if backgroundGradient then
+                    backgroundGradient:Destroy()
+                end
+            end)
+
+            -- BACKGROUND FRAME'İ TRANSPARAN YAP VE KÜÇÜLT
+            local backgroundExit = TweenService:Create(backgroundFrame, combinedExitTweenInfo, {
+                Size = UDim2.new(0, finalSize, 0, finalSize),
+                Position = UDim2.new(0.5, -finalSize/2, 0.5, -finalSize/2),
+                BackgroundTransparency = 1
+            })
+
+            -- 3. Corner'ı tekrar daire yap
+            local cornerReturn = TweenService:Create(backgroundCorner, combinedExitTweenInfo, {
+                CornerRadius = UDim.new(1, 0)
+            })
+
+            -- 4. Glow frame için son parlama efekti
+            local glowFinalExit = TweenService:Create(glowFrame, combinedExitTweenInfo, {
+                Size = UDim2.new(0, finalSize * 1.2, 0, finalSize * 1.2),
+                Position = UDim2.new(0.5, -finalSize * 0.6, 0.5, -finalSize * 0.6),
+                BackgroundTransparency = 1,
+                BackgroundColor3 = Color3.fromRGB(100, 180, 255)
+            })
+
+            -- Animasyonları başlat
+            backgroundExit:Play()
+            cornerReturn:Play()
+            glowFinalExit:Play()
+
+            -- Animasyon bitince temizlik
+            backgroundExit.Completed:Connect(function()
+                print("99") -- Mevcut komut korundu
+                screenGui:Destroy()
+            end)
+        end
+
+        spawn(function()
+            wait(totalLetterTime + ANIMATION_DURATION.FINAL_HOLD) -- 6 saniye bekleme
+            animateExitSequence()
+        end)
+    end)
+end
+
+-- BAŞLATMA
+setupResponsiveDesign()
+
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+    setupResponsiveDesign()
+end)
+
+-- Ultra premium animasyonu başlat
+spawn(function()
+    wait(0.1)
+    startUltraPremiumIntroAnimation()
+end)

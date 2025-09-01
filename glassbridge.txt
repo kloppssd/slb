@@ -1,0 +1,187 @@
+-- Basit Maid sınıfı
+local function NewMaid()
+	local tasks = {}
+	return {
+		GiveTask = function(self, t)
+			table.insert(tasks, t)
+		end,
+		Destroy = function(self)
+			for _, v in ipairs(tasks) do
+				if typeof(v) == "RBXScriptConnection" then
+					v:Disconnect()
+				elseif typeof(v) == "function" then
+					v()
+				end
+			end
+			table.clear(tasks)
+		end
+	}
+end
+
+-- Basit UIManager mock
+local UIManager = {}
+UIManager.Toggles = {}
+
+function UIManager:AddToggle(name, displayName, default)
+	local toggle = {}
+	toggle.Value = default or false
+	toggle._callbacks = {}
+
+	function toggle:OnChanged(cb)
+		table.insert(self._callbacks, cb)
+	end
+	function toggle:Set(value)
+		self.Value = value
+		for _, cb in ipairs(self._callbacks) do
+			cb(value)
+		end
+	end
+	function toggle:Get()
+		return self.Value
+	end
+
+	UIManager.Toggles[name] = toggle
+	return toggle
+end
+
+function UIManager:GetToggleValue(name)
+	local toggle = UIManager.Toggles[name]
+	return toggle and toggle:Get() or false
+end
+
+function UIManager:SetToggleValue(name, val)
+	local toggle = UIManager.Toggles[name]
+	if toggle then
+		toggle:Set(val)
+	end
+end
+
+-- GlassBridge modül
+local GlassBridge = {}
+GlassBridge.__index = GlassBridge
+
+function GlassBridge.new(UIManager)
+	local self = setmetatable({}, GlassBridge)
+
+	self._UIManager = UIManager
+	self._Maid = NewMaid()
+
+	self._UIManager:AddToggle("GlassBridgeESP", "Glass Bridge ESP", false)
+
+	return self
+end
+
+function GlassBridge:Start()
+	local GlassHolder = workspace:WaitForChild("GlassBridge"):WaitForChild("GlassHolder")
+
+	local function SetupGlassPart(GlassPart)
+		local CanEnableGlassBridgeESP = self._UIManager:GetToggleValue("GlassBridgeESP")
+		if not CanEnableGlassBridgeESP then
+			GlassPart.Color = Color3.fromRGB(106, 106, 106)
+			GlassPart.Transparency = 0.45
+			GlassPart.Material = Enum.Material.SmoothPlastic
+		else
+			local Color = GlassPart:GetAttribute("exploitingisevil") and Color3.fromRGB(248, 87, 87) or Color3.fromRGB(28, 235, 87)
+			GlassPart.Color = Color
+			GlassPart.Transparency = 0
+			GlassPart.Material = Enum.Material.Neon
+		end
+	end
+
+	self._UIManager.Toggles.GlassBridgeESP:OnChanged(function()
+		for _, PanelPair in ipairs(GlassHolder:GetChildren()) do
+			for _, Panel in ipairs(PanelPair:GetChildren()) do
+				local GlassPart = Panel:FindFirstChild("glasspart")
+				if GlassPart and GlassPart:IsA("BasePart") then
+					task.defer(SetupGlassPart, GlassPart)
+				end
+			end
+		end
+	end)
+
+	self._Maid:GiveTask(GlassHolder.DescendantAdded:Connect(function(Descendant)
+		if Descendant.Name == "glasspart" and Descendant:IsA("BasePart") then
+			task.defer(SetupGlassPart, Descendant)
+		end
+	end))
+
+	self._Maid:GiveTask(function()
+		self._UIManager.Toggles.GlassBridgeESP:OnChanged(function() end)
+	end)
+
+	warn("GlassBridge feature started!")
+end
+
+function GlassBridge:Destroy()
+	self._Maid:Destroy()
+	warn("GlassBridge feature destroyed!")
+end
+
+-- GUI oluşturma
+
+local CoreGui = game:GetService("CoreGui")
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MainToggleUI"
+ScreenGui.Parent = CoreGui
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 250, 0, 140)
+Frame.Position = UDim2.new(0.5, -125, 0.2, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.AnchorPoint = Vector2.new(0.5, 0)
+Frame.Parent = ScreenGui
+Frame.Active = true
+Frame.Draggable = true
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 12)
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -20, 0, 30)
+Title.Position = UDim2.new(0, 10, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Text = "Glass Bridge ESP"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextSize = 20
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Frame
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0.8, 0, 0, 40)
+ToggleButton.Position = UDim2.new(0.1, 0, 0.5, 0)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+ToggleButton.Text = "Glass Bridge ESP: OFF"
+ToggleButton.TextColor3 = Color3.new(1, 1, 1)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 16
+ToggleButton.Parent = Frame
+Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 10)
+
+-- UIManager instance
+local UIManagerInstance = UIManager
+
+-- GlassBridge instance
+local GlassBridgeInstance = GlassBridge.new(UIManagerInstance)
+GlassBridgeInstance:Start()
+
+-- Toggle UI ve backend bağlantısı
+local function updateToggleUI(state)
+	if state then
+		ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+		ToggleButton.Text = "Glass Bridge ESP: ON"
+	else
+		ToggleButton.BackgroundColor3 = Color3.fromRGB(130, 40, 40)
+		ToggleButton.Text = "Glass Bridge ESP: OFF"
+	end
+end
+
+ToggleButton.MouseButton1Click:Connect(function()
+	local currentState = UIManagerInstance:GetToggleValue("GlassBridgeESP")
+	UIManagerInstance:SetToggleValue("GlassBridgeESP", not currentState)
+end)
+
+UIManagerInstance.Toggles.GlassBridgeESP:OnChanged(function(state)
+	updateToggleUI(state)
+end)
+
+updateToggleUI(UIManagerInstance:GetToggleValue("GlassBridgeESP"))

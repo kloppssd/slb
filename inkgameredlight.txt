@@ -1,0 +1,10 @@
+-- Karakteri yeni konuma ışınlayan script
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Yeni hedef pozisyon
+local hedefPozisyon = Vector3.new(-44.2, 1024.8, 136.8)
+
+-- Işınla
+rootPart.CFrame = CFrame.new(hedefPozisyon)
